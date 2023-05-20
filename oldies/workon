@@ -8,7 +8,7 @@ if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
 	exit 0
 fi
 
-if [[ $1 == "ljca" ]]; then
+if [[ $1 == "ljca" ]] || [[ $1 == "aicv" ]]; then
 	cd "/home/lifu/nx40/ljca/ivsc-driver/drivers/mfd"
 
 elif [[ $1 == "usb" ]] || [[ $1 == "usbio" ]] ; then
