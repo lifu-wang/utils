@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# miswlf0 w/ more addl comments
+
 # git
 # From your GitHub account, go to Settings → Developer Settings → 
 # Personal Access Token → Generate New Token (Give your password) → 
