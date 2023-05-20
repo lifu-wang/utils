@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# source /usr/bin/workon linux
+# . workon linux
+
+if [[ $1 == "-h" ]] || [[ $1 == "--help" ]]; then
+	echo "$0 [usb | ljca | linux]"
+	exit 0
+fi
+
+if [[ $1 == "ljca" ]]; then
+	cd "/home/lifu/nx40/ljca/ivsc-driver/drivers/mfd"
+
+elif [[ $1 == "usb" ]] || [[ $1 == "usbio" ]] ; then
+	cd "/home/lifu/nx40/usbio/drivers.platform.lch.linux-usbio/drivers/mfd"
+
+elif [[ $1 == "linux" ]]; then
+	
+	cd "/home/lifu/nx40/linux-5.19.10"
+else
+	echo "$0 [usb | ljca | linux]"
+fi
+

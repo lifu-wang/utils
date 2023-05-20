@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+if [ "$1" == "-h" ]; then
+   echo "Usage: bcscope [ linux | ljca | usbio ]"
+   echo
+   echo
+   exit
+fi
+
+if [[ "$1" == "linux" ]]; then
+   /usr/bin/cscope -d -P /home/lifu/nx40/linux-5.19.10 -p 3 -f /home/lifu/.bcs/linux-bcscope.files
+
+elif [[ $1 == "aicv" ]] || [[ $1 == "ljca" ]]; then
+   /usr/bin/cscope -d -P /home/lifu/nx40 -p 3 -f /home/lifu/.bcs/ljca-bcscope.files
+
+elif [[ $1 == "usbio" ]] || [[ $1 == "usb" ]]; then
+   /usr/bin/cscope -d -P /home/lifu/nx40 -p 3 -f /home/lifu/.bcs/usbio-bcscope.files
+
+else
+      #/usr/bin/cscope
+      echo "Usage: bcscope -h"
+      echo
+      echo
+fi
