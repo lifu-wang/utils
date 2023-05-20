@@ -6,6 +6,9 @@
 # Fillup the form → click Generate token → Copy the generated Token, 
 # it will be something like ghp_sFhFsSHhTzMDreGRLjmks4Tzuzgthdvfsrta
 
+# git remote set-url origin https://<githubtoken>@github.com/<username>/<repositoryname>.git
+
+
 
 # source /usr/bin/workon linux
 # . workon linux
