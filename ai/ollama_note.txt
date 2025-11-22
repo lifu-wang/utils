@@ -1,0 +1,9 @@
+C:\Users\miswl\.ollama>more C:\Users\miswl\.ollama\config.yaml
+server:
+  timeout: 300000        # in milliseconds, i.e., 5 minutes
+  max_context_tokens: 8192
+logging:
+  level: info
+
+
+C:\Users\miswl\.ollama>ollama start
