@@ -1,3 +1,27 @@
+
+
+#-----
+# uvx 
+
+PS C:\Users\miswl> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+C:\Users\miswl>uvx pycowsay "hello world"
+  -----------
+< hello world >
+  -----------
+   \   ^__^
+    \  (oo)\_______
+       (__)\       )\/\
+           ||----w |
+           ||     ||
+
+
+lifu@PCHOME:~$ curl -LsSf https://astral.sh/uv/install.sh | sh
+
+
+
+#-------------------------
+# Ollama config & service
+
 C:\Users\miswl\.ollama>more C:\Users\miswl\.ollama\config.yaml
 server:
   timeout: 300000        # in milliseconds, i.e., 5 minutes
@@ -5,11 +29,40 @@ server:
 logging:
   level: info
 
+# Ctrl-Alt-Del: kill all ollama process
 
-C:\Users\miswl\.ollama>ollama start
+# ollama start: start background servr
+C:\> ollama start
+C:\> ollama run llama3.2:latest "hello"
 
-#---------
-# Mac OS
+# ollama serve: expose HTTP/REST API server, default is port 11434
+C:\> ollama serve llama3.2:latest --port 11434
+C:\> curl -X POST http://localhost:11434/predict -d '{"prompt":"Hello"}'
+C:\> ollama stop llama3.2:latest
+
+# check port
+C:\> netstat -ano | findstr 11434
+
+lifu@PCHOME:~$ sudo lsof -i :11434
+lifu@PCHOME:~$ sudo netstat -tuln | grep 11434
+
+
+#--------------------
+# Window: cline error
+
+# Errors: {"message":"Ollama request timed out after 30 seconds","modelId":"qwen3-coder:latest","providerId":"ollama"}
+# Reason: 
+#   C:\> ollama run qwen3-coder:latest "hi" --> if taking 30+ sec, model is too big
+#   C:\> ollama serve
+# 
+
+# Fix:
+# VS code: Ctrl+Shift+p: Open user settings (JSON)
+# add between {}
+      "cline.timeoutMs": 120000
+      
+#------------------------
+# Mac OS: Ollama install
 
 # clean
 sudo rm -rf /Applications/Ollama.app
