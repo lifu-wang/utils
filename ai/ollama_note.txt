@@ -1,7 +1,25 @@
 
+#-------------------
+# NVIDIA 
 
-#-----
-# uvx 
+$ ubuntu-drivers list
+$ apt install -y nvidia-driver-580-server nvidia-cuda-toolkit
+$ reboot
+
+$ nvidia-smi
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   ... 
+
+$ nvcc --version
+Cuda compilation tools, release 12.0, V12.0.140
+
+$ gpustat
+alien18-R2                             Mon Nov 24 15:50:15 2025  580.95.05
+[0] NVIDIA GeForce RTX 4060 Laptop GPU | 50°C,  16 % |    14 /  8188 MB | gdm(4M)
+
+
+
+#-------------------
+# mcp server by uvx 
 
 PS C:\Users\miswl> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 C:\Users\miswl>uvx pycowsay "hello world"
@@ -14,13 +32,49 @@ C:\Users\miswl>uvx pycowsay "hello world"
            ||----w |
            ||     ||
 
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
+$ uvx pycowsay "hello world"
 
-lifu@PCHOME:~$ curl -LsSf https://astral.sh/uv/install.sh | sh
+$ mkdir ~/proj/workspace/mcp_weather 
+$ cd ~/proj/workspace/mcp_weather
 
+# from https://github.com/daycyberwox/mcp-weather-app/blob/main/weather.py
+$ cat > weather.py
 
+# VScode/Cline MCP servers: Configure -> Configure MCP servers -> save/enable
+{
+  "mcpServers": {
+    "weather": {
+      "command": "/home/lifu/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/home/lifu/proj/workspace/mcp_weather",
+        "run",
+        "weather.py"
+      ]
+    }
+  }
+}
+
+# Make sure uv run without errors
+$ apt install python3-httpx
+$ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
+
+$ uv --directory /home/lifu/proj/workspace/mcp_weather run weather.py
+
+# Go VScode/Cline: ask "what's my weather"
+
+#--------
+# Spark
+#
+# - No need to change config timeout
+# - use qwen3-coder
 
 #-------------------------
-# Ollama config & service
+# Ollama install, config & service
+
+$ curl -fsSL https://ollama.com/install.sh | sh
+$ ollama list; ollama run gpt-oss --verbose; ollama show gpt-oss
 
 C:\Users\miswl\.ollama>more C:\Users\miswl\.ollama\config.yaml
 server:

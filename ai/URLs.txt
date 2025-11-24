@@ -8,3 +8,4 @@ https://www.youtube.com/watch?v=yjBUnbRgiNs&t=391s
 https://docs.astral.sh/uv/guides/tools/
 https://github.com/adhikasp/mcp-weather
 https://mcp.so/
+https://github.com/astral-sh/uv
