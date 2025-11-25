@@ -45,24 +45,45 @@ $ cat > weather.py
 {
   "mcpServers": {
     "weather": {
-      "command": "/home/lifu/.local/bin/uv",
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
       "args": [
         "--directory",
-        "/home/lifu/proj/workspace/mcp_weather",
+        "/Users/lifuwang/proj/workspace/mcp_weather",
         "run",
         "weather.py"
+      ]
+    },
+    "timer": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/lifuwang/proj/workspace/mcp_timer",
+        "run",
+        "timer.py"
       ]
     }
   }
 }
 
+
 # Make sure uv run without errors
 $ apt install python3-httpx
 $ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
 
-$ uv --directory /home/lifu/proj/workspace/mcp_weather run weather.py
+$ cd /Users/lifuwang/proj/workspace/mcp_timer
+$ uv run timer.py 
 
-# Go VScode/Cline: ask "what's my weather"
+$ uv --directory $HOME/proj/workspace/mcp_weather run weather.py
+$ uv --directory $HOME/proj/workspace/mcp_timer run timer.py
+
+
+# Go VScode/Cline: ask "what's my weather", "Call get_current_time tool for timezone "Europe/London"
+
 
 #--------
 # Spark

@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "weather": {
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/lifuwang/proj/workspace/mcp_weather",
+        "run",
+        "weather.py"
+      ]
+    },
+    "timer": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/lifuwang/proj/workspace/mcp_timer",
+        "run",
+        "timer.py"
+      ]
+    }
+  }
+}
