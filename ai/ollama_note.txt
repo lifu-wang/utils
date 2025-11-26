@@ -71,6 +71,18 @@ $ cat > weather.py
 }
 
 
+#-----------------
+# Simple mcp test
+
+$ sudo apt install pipx
+$ pipx install --force "mcp[cli]"
+$ mcp dev mcp_server_min.py
+$ lsof -i :6274
+# Go http://localhost:6274
+
+$ pipx uninstall "mcp[cli]"
+
+
 # Make sure uv run without errors
 $ apt install python3-httpx
 $ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
