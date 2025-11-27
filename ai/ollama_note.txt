@@ -17,12 +17,177 @@ alien18-R2                             Mon Nov 24 15:50:15 2025  580.95.05
 [0] NVIDIA GeForce RTX 4060 Laptop GPU | 50°C,  16 % |    14 /  8188 MB | gdm(4M)
 
 
+#------------------------------
+# Open WebUI:8000 Installation
 
-#-------------------
-# mcp server by uvx 
+# Windows - first, start docker desktop 
 
+C:\Users\miswl> docker pull ghcr.io/open-webui/open-webui:main
+C:\Users\miswl> mkdir openwebui-data
+C:\Users\miswl> docker run -d --name open-webui -p 3000:8080 -v C:\Users\miswl\openwebui-data:/app/backend/data ghcr.io/open-webui/open-webui:main
+
+# Go http://localhost:3000   Lifu.Wang@gmail.com lifu
+# Select model "llama3.2:latest" or + to change model
+
+
+#-----------------------------------
+# MCP with Inspector and Open WebUI
+
+C:\Users\miswl\tmp>del mcp-server-demo
+C:\Users\miswl\tmp>cd mcp-server-demo
+
+# pip install "mcp[cli]"
+C:\Users\miswl\tmp\mcp-server-demo>uv add "mcp[cli]"
+
+# no error
+C:\Users\miswl\tmp\mcp-server-demo> uv run mcp
+C:\Users\miswl\tmp\mcp-server-demo> notepad main.py
+
+# main for basic_tool
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(name="Tool Example")
+
+@mcp.tool()
+def sum(a: int, b: int) -> int:
+    """Add two numbers together."""
+    return a + b
+
+@mcp.tool()
+def get_weather(city: str, unit: str = "celsius") -> str:
+    """Get weather for a city."""
+    # This would normally call a weather API
+    return f"Weather in {city}: 22degrees{unit[0].upper()}"
+
+@mcp.tool()
+def reverse_string(text: str) -> str:
+    """Reverse the input string."""
+    return text[::-1]
+
+# Only for "mcpo --port 8000 -- python main.py" for open WebUI
+if __name__ == "__main__":
+    mcp.run()
+
+C:\Users\miswl\tmp\mcp-server-demo> mcp dev main.py
+
+# Test with MCP Inspector, Go http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=a0fa7573b6eafadfcddc992fa510231d80ce1679c398cb8a1f20044f552b0dfe#resources
+# Connect -> Tools -> sum, reverse_string, get_wether
+
+# DOS command curl doesn't work!
+$ curl -X POST http://localhost:8000/sum -H "Content-Type: application/json" -d '{"a": 2, "b": 3}'
+
+# Test with Open WebUI
+C:\Users\miswl\tmp\mcp-server-demo> mcpo --port 8000 -- python main.py
+
+# Check http://localhost:8000/deocs and http://localhost:8000/openapi.json
+# Open WebUI: GL -> Setting -> External tools -> URL: http://localhost:8000, 
+#             save, to make sure green light
+#             below prompt, see tool icon -> Enable -> V sees "Add two numbers together",
+#             "Reverse the input string", ...
+#             On prompt, ask "Reverse the input string. “hey haha”, if using mcp, below
+#             the answer, there will be "1 source" link
+
+Prompt> "Reverse the input string. “hey haha”,
+
+
+#------
+# MCPO
+
+C:\Users\miswl\tmp> git clone https://github.com/open-webui/openapi-servers
+C:\Users\miswl\tmp> cd openapi-servers\servers\mcp-proxy  
+C:\Users\miswl\tmp\openapi-servers\servers\mcp-proxy> pip install -r requirements.txt
+C:\Users\miswl\tmp\openapi-servers\servers\mcp-proxy> uvicorn main:app --host 0.0.0.0 --reload   
+
+# Go http://localhost:8000/docs to test
+
+C:\Users\miswl\tmp\openapi-servers\servers\mcp-proxy> python main.py --host 0.0.0.0 --port 8000 -- uvx mcp-server-time --local-timezone=America/New_York
+
+# Go http://localhost:8000/docs to test
+
+# On docker desktop, restart image, or 
+# "docker run -d --name open-webui -p 3000:8080 -v C:\Users\miswl\openwebui-data:/app/backend/data ghcr.io/open-webui/open-webui:main"
+# Go http:localhost:3000, Left-button: (GL) -> Settings -> Manage Tool Servers -> 
+#    URL http://localhost:8000, Auth: None -> Save (restart should be green)
+#    Under prompt, available tool -> enable mcp-time - v1.22.0 
+
+Prompt> Ask "what's the time in Austin? Click source, tool_get_current_time_post, params {...}
+
+
+# Use pip package via mcpo
+C:\Users\miswl> pip install mcpo
+C:\Users\miswl> pip install mcp-server-fetch
+C:\Users\miswl> python -m mcp_server_fetch  
+C:\Users\miswl> mcpo --port 8000 -- uvx mcp-server-fetch
+
+# http://localhost:8000/docs , go POST fetch
+# {
+#  "url": "string",
+#  "max_length": 5000,
+#  "start_index": 0,
+#  "raw": false
+#}
+
+C:\Users\miswl\tmp\app> notepad app.py
+# app.py
+import requests
+import json
+
+def fetch_webpage(url, max_length=10000, start_index=0, raw=False):
+    """
+    Fetch content from a URL using the MCP Fetch server.
+
+    Args:
+        url (str): The URL to fetch
+        max_length (int): Maximum number of characters to return
+        start_index (int): Start content from this character index
+        raw (bool): Get raw HTML content without markdown conversion
+
+    Returns:
+        dict: The response from the server containing the fetched content
+    """
+    try:
+        # Make a POST request to the fetch endpoint
+        response = requests.post(
+            "http://localhost:8000/fetch",
+            json={
+                "url": url,
+                "max_length": max_length,
+                "start_index": start_index,
+                "raw": raw
+            }
+        )
+
+        # Ensure the request was successful
+        response.raise_for_status()
+
+        # Parse the response
+        return response.json()
+    except Exception as e:
+        return {"error": str(e)}
+
+# Example usage
+if __name__ == "__main__":
+    # Fetch the specific URL you requested
+    target_url = "https://www.aivi.fyi/aiagents/RooCode-Gemini2.5Pro-OpenAIAgentsSDK"
+    result = fetch_webpage(target_url)
+    print(result)
+
+C:\Users\miswl\tmp\app> python app.py
+	...
+
+[TBD] ** Error **
+C:\Users\miswl>pip install open-webui
+C:\Users\miswl>open-webui serve
+--> [TBD] OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed. Error loading
+--> Should be able to go localhost:8000, settings -> tool -> add URL: localhost:8000
+
+
+#-----
+# uvx 
+
+# Windows
 PS C:\Users\miswl> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-C:\Users\miswl>uvx pycowsay "hello world"
+C:\Users\miswl> uvx pycowsay "hello world"
   -----------
 < hello world >
   -----------
@@ -32,14 +197,45 @@ C:\Users\miswl>uvx pycowsay "hello world"
            ||----w |
            ||     ||
 
+# Linux/Mac
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
 $ uvx pycowsay "hello world"
 
 $ mkdir ~/proj/workspace/mcp_weather 
 $ cd ~/proj/workspace/mcp_weather
 
+
+#------------
+# UV in mcp 
+
+$ sudo apt install pipx
+$ pipx install --force "mcp[cli]"
+$ mcp dev mcp_server_min.py
+# Go http://localhost:6274
+
+# Check open port listening
+$ lsof -i :6274
+C:\Users\miswl>netstat -ano | findstr :6274
+
+$ pipx uninstall "mcp[cli]"
+
+
+# Make sure uv run without errors
+$ apt install python3-httpx
+$ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
+
+$ cd /Users/lifuwang/proj/workspace/mcp_timer
+$ uv run timer.py 
+
+$ uv --directory $HOME/proj/workspace/mcp_weather run weather.py
+$ uv --directory $HOME/proj/workspace/mcp_timer run timer.py
+
+
+#--------------------------
+# VSCODE/Cline/MCP with uv
+
 # from https://github.com/daycyberwox/mcp-weather-app/blob/main/weather.py
-$ cat > weather.py
+$ vim weather.py
 
 # VScode/Cline MCP servers: Configure -> Configure MCP servers -> save/enable
 {
@@ -70,31 +266,8 @@ $ cat > weather.py
   }
 }
 
-
-#-----------------
-# Simple mcp test
-
-$ sudo apt install pipx
-$ pipx install --force "mcp[cli]"
-$ mcp dev mcp_server_min.py
-$ lsof -i :6274
-# Go http://localhost:6274
-
-$ pipx uninstall "mcp[cli]"
-
-
-# Make sure uv run without errors
-$ apt install python3-httpx
-$ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
-
-$ cd /Users/lifuwang/proj/workspace/mcp_timer
-$ uv run timer.py 
-
-$ uv --directory $HOME/proj/workspace/mcp_weather run weather.py
-$ uv --directory $HOME/proj/workspace/mcp_timer run timer.py
-
-
-# Go VScode/Cline: ask "what's my weather", "Call get_current_time tool for timezone "Europe/London"
+# Go VScode/Cline chat panel (VERY VERY SLOW WITH ERRORS?RETRY: 
+Prompt: what's my weather, "Call get_current_time tool for timezone "Europe/London"
 
 
 #--------
