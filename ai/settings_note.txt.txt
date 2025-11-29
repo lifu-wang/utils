@@ -1,0 +1,63 @@
+C:\Users\miswl>wsl -l -v
+  NAME              STATE           VERSION
+* Ubuntu            Running         2
+  Ubuntu-24.04      Running         2
+  Ubuntu-22.04      Running         2
+  docker-desktop    Stopped         2
+
+
+C:\Users\miswl>wsl --shutdown
+
+C:\Users\miswl>wsl -l -v
+  NAME              STATE           VERSION
+* Ubuntu            Stopped         2
+  Ubuntu-24.04      Stopped         2
+  Ubuntu-22.04      Stopped         2
+  docker-desktop    Stopped         2
+
+
+
+lifu@PCHOME:~$ lsb_release -r
+No LSB modules are available.
+Release:        24.04
+
+# Xterm on WSL
+lifu@PCHOME:~$ export DISPLAY=$(echo $DISPLAY)
+lifu@PCHOME:~$ export GDK_SCALE=2
+lifu@PCHOME:~$ xterm -fa 'Monospace' -fs 18
+lifu@PCHOME:~$ xterm -fa 'Monospace' -fs 18 -bg gray32 -fg white  -cr green
+
+# VSCode on WSL
+lifu@PCHOME:~$ wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+lifu@PCHOME:~$ sudo install -D -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/packages.microsoft.gpg
+lifu@PCHOME:~$ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
+lifu@PCHOME:~$ sudo apt update
+lifu@PCHOME:~$ sudo apt install code -y
+lifu@PCHOME:~$ which code
+/usr/bin/code
+
+lifu@PCHOME:~$ export DISPLAY=$(echo $DISPLAY)
+lifu@PCHOME:~$ xterm -fa 'Monospace' -fs 18
+lifu@PCHOME:~$ code .
+
+# VS cope 
+# Use Windows and extension 
+lifu@PCHOME:~$ code .
+
+# Use Windows but not extension
+lifu@PCHOME:~$ code --user-data-dir=$HOME/.vscode-linux --extensions-dir=$HOME/.vscode-linux/extensions
+
+# Use Linux
+lifu@PCHOME:~$ export GDK_SCALE=2
+lifu@PCHOME:~$ export GDK_DPI_SCALE=1.25
+lifu@PCHOME:~$ /usr/share/code/bin/code   
+
+# Start xterm, code will only run Ubuntu's, '-vb' make xterm bell off 
+lifu@PCHOME:~$ xterm -fa 'Monospace' -fs 18 -bg gray32 -fg white  -cr green
+lifu@PCHOME:~$ xterm -fa 'Monospace' -vb -fs 18 -bg gray32 -fg white  -cr green -e "code; bash"
+
+# Check extension
+# Ctrl + Shift + P: show running extension, right click and disable unused one!
+
+
+
