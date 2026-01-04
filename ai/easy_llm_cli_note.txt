@@ -1,0 +1,86 @@
+# TBD: still using Claude backend even we config to qwen
+
+# Venv
+(base) lifu@Lifus-Mac-mini ~ % conda create --name LLM python=3.10
+(base) lifu@Lifus-Mac-mini ~ % conda activate LLM
+(base) lifu@Lifus-Mac-mini ~ % # deactivate LLM
+(base) lifu@Lifus-Mac-mini ~ % # conda env remove -n LLM
+
+
+# Ollama model must be able to support tool API 
+(LLM) lifu@Lifus-Mac-mini ~ % ollama pull qwen2.5:3b                          
+(LLM) lifu@Lifus-Mac-mini ~ % curl http://localhost:11434/v1/models/qwen2.5:3b            
+{"id":"qwen2.5:3b","object":"model","created":1767544727,"owned_by":"library"}
+
+(LLM) lifu@Lifus-Mac-mini ~ % curl -X POST http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:3b",
+    "messages": [{"role":"user","content":"Hello, world!"}],
+    "tools": [],
+    "stream": false
+  }'
+{"id":"chatcmpl-495","object":"chat.completion","created":1767547651,"model":"qwen2.5:3b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! It's great to see you greeting the world. How can I assist you today?"},"finish_reason":"stop"}],"usage":{"prompt_tokens":33,"completion_tokens":20,"total_tokens":53}}
+
+
+# Easy-LLM-CLI https://github.com/ConardLi/easy-llm-cli
+# First, need full disk access
+  1. Open System Settings → Privacy & Security → Full Disk Access
+  2. Add your terminal app (e.g., iTerm, Terminal, VS Code)
+  3. Restart Terminal
+
+(LLM) lifu@Lifus-Mac-mini ~ % brew update
+(LLM) lifu@Lifus-Mac-mini ~ % brew update
+(LLM) lifu@Lifus-Mac-mini ~ % npx easy-llm-cli
+
+(LLM) lifu@Lifus-Mac-mini ~ % \
+export USE_CUSTOM_LLM=true
+export CUSTOM_LLM_PROVIDER=ollama
+export CUSTOM_LLM_ENDPOINT=http://localhost:11434/v1
+export CUSTOM_LLM_MODEL_NAME=qwen2.5:3b
+unset CUSTOM_LLM_API_KEY
+export EASY_LLM_SKIP_GEMINI_CHECK=true
+
+(base) lifu@Lifus-Mac-mini ~ % npx easy-llm-cli
+(base) lifu@Lifus-Mac-mini ~ % which elc
+/opt/homebrew/bin/elc
+(base) lifu@Lifus-Mac-mini ~ % elc
+
+# Alias
+(LLM) lifu@Lifus-Mac-mini ~ % vim ~/.zshrc
+alias easy-llm-cli="npx easy-llm-cli"
+source ~/.zshrc
+(base) lifu@Lifus-Mac-mini ~ % conda activate LLM
+(LLM) lifu@Lifus-Mac-mini ~ % npx easy-llm-cli --version
+0.1.11
+
+
+# Uninstall Easy-LLM-CLI  
+(LLM) lifu@Lifus-Mac-mini gemini-ollama % npm list -g
+/opt/homebrew/lib
+├── easy-llm-cli@0.1.11
+└── npm@11.6.2
+
+(LLM) lifu@Lifus-Mac-mini ~ % # sudo npm uninstall -g easy-llm-cli@0.1.11
+(LLM) lifu@Lifus-Mac-mini ~ % # \
+rm -rf /opt/homebrew/lib/node_modules/easy-llm-cli
+rm -rf /opt/homebrew/lib/node_modules/easy-llm-cli
+rm -f /opt/homebrew/bin/easy-llm-cli
+rm -rf ~/.npm/_npx
+
+# Uninstall Gemini
+(LLM) lifu@Lifus-Mac-mini ~ % # \
+rm -f /opt/homebrew/bin/gemini
+rm -rf /opt/homebrew/lib/node_modules/gemini
+rm -rf /opt/homebrew/lib/node_modules/easy-llm-cli
+rm -rf ~/.npm/_npx
+rm -rf  ~/.gemini 
+
+
+# Install Gemini
+(base) lifu@Lifus-Mac-mini ~ % npm install -g @google/gemini-cli 
+(base) lifu@Lifus-Mac-mini ~ % npm list -g
+/opt/homebrew/lib
+├── @google/gemini-cli@0.22.5
+└── npm@11.6.2
+
