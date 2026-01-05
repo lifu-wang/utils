@@ -1,0 +1,5 @@
+
+Extract the whole conversation (excluding this one) into the Canvas mode with Markdown formatting. Please label the "User" and "Gemini".
+
+Tools -> Canvas -> model: flash
+ 
