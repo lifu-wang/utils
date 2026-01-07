@@ -17,8 +17,6 @@ alien18-R2                             Mon Nov 24 15:50:15 2025  580.95.05
 [0] NVIDIA GeForce RTX 4060 Laptop GPU | 50°C,  16 % |    14 /  8188 MB | gdm(4M)
 
 
-#------------------------------
-# Open WebUI:8000 Installation
 
 # Windows - first, start docker desktop 
 

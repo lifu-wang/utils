@@ -1,0 +1,124 @@
+#------------------------------
+# Open WebUI
+
+Open WebUI does not natively support stdio transport for MCP servers. 
+It exclusively uses Streamable HTTP (SSE) because stdio is unsuitable 
+for multi-user web environments. To connect an MCP server that only supports 
+stdio, you must use a proxy to bridge the connection (a.k.a mcpo).
+
+MCPO: MCP-to-OpenAPI) is an essential proxy tool that bridges the gap between 
+local Model Context Protocol (MCP) servers and web-based applications 
+like Open WebUI
+
+
+
+# Open-webui Linux
+https://github.com/open-webui/open-webui?tab=readme-ov-file
+pip install open-webui
+open-webui serve
+http://localhost:8080
+
+# LLM Model:
+New Chat: on top llama3.1:8b v, v pull down to select model
+
+# Kernel Doc
+# cp process and schedule into Documentation/
+$ parse_docs.py
+$ tree processed_docs/ | wc
+     77     212    2701
+
+# nomic-embed for RAG  
+ollama pull nomic-embed-text
+
+
+
+#----------------------------------------------------------
+# RAG
+
+Workspace -> Knowlege -> + New Knowledge -> working on kernel knowledge, achieve coding -> +
+          -> upload files, update dir 'processed_docs', ...
+New Chat: '#' to select kernel knowledge and start chat
+          explain me what kind of scheduler, show the pseudo code style how SCHED_DEADLINE works,
+          show me examples of kernel coding styles, etc...
+  
+
+#----------------------------------------------------------
+# MCP
+
+$ source ~/py311/bin/activate
+$ pip install mcp mcpo flask fastmcp unicorn
+
+#
+# STDIO
+#
+$ vim hello-world.py
+from mcp.server.fastmcp import FastMCP
+import sys
+import logging
+logging.basicConfig(level=logging.INFO, stream=sys.stderr)
+
+mcp = FastMCP("HelloWorld")
+
+@mcp.tool()
+def say_hello(name: str = "World") -> str:
+    """
+    Greets the user with a simple message.
+    :param name: The name of the person to greet.
+    """
+    return f"Hello, {name}! This response came from a local stdio MCP server."
+
+if __name__ == "__main__":
+    # mcp.run() defaults to stdio transport
+    mcp.run()
+
+$ mcpo --host 0.0.0.0 --port 8000 -- python hello-world.py
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+# Quick test
+$ curl http://localhost:8000/openapi.json
+
+# Chat open-webui 
+#    Setting: External tools -> + -> URL: http://100.83.240.59:8000, 
+#             OpenAPI spec: URL, openapi.json, Auth: Bearer, AKI Key -> Save
+#    Chat: under chat box, right to +, click "integration", will see Tools HelloWorld, Enable it!!
+#          tool icon will show 1
+#
+#    Test "Use your hello tool to greet me", will see According to the hello tool's manual that was used to generate the initial greeting ("Hello!"), I can use it to respond to your query. 
+
+
+#
+# HTTP [TBD]
+#
+$ vim hello-world-http.py
+from fastapi import FastAPI
+import uvicorn
+
+# 1. Create the app
+app = FastAPI(title="HelloWorld Tool")
+
+# 2. Define the tool
+# The 'operation_id' becomes the tool name in Open WebUI
+@app.get("/say_hello", operation_id="say_hello")
+def say_hello(name: str = "World") -> dict:
+    """
+    Greets the user.
+    """
+    return {"result": f"Hello, {name}! Connected via Native OpenAPI."}
+
+if __name__ == "__main__":
+    # Run on port 8000
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+$ python hello-world-http.py
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+
+$ curl http://0.0.0.0:8000/openapi.json
+{"openapi":"3.1.0","info":{"title":"HelloWorld Tool"
+
+
+# XXXXTBD XXXXX - error: Failed to connect to http://100.83.240.59:8000 OpenAPI tool server
+URL http://100.83.240.59:8000, OpenAPI spec: URL openapi.json, Auth API Key
+        
+
