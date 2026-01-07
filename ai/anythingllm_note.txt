@@ -1,0 +1,81 @@
+
+
+lifu@alien18-R2:~/mcp$ cat ~/mcp/weather_server.py 
+from mcp.server.fastmcp import FastMCP
+import logging
+
+# Configure logging
+logging.basicConfig(
+    filename='/home/lifu/mcp_debug.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logging.info("Starting Weather MCP Server...")
+
+# Initialize the FastMCP server
+mcp = FastMCP("weather_service")
+
+@mcp.tool()
+def get_temp(city: str) -> str:
+    """
+    Retrieves the real-time current temperature for a specific city. 
+    USE THIS TOOL whenever a user asks about weather or temperature.
+    
+    Args:
+        city: The name of the city (e.g., 'Austin', 'Phoenix'). Mandatory.
+    """
+    logging.info(f"Tool 'get_temp' called with city: {city}")
+    city_lower = city.strip().lower()
+    
+    if city_lower == "austin":
+        return "80F"
+    elif city_lower == "phoenix":
+        return "100F"
+    else:
+        return "N/A"
+
+if __name__ == "__main__":
+    logging.info("Main execution started")
+    # fastmcp runs on stdio by default when executed directly
+    mcp.run()
+
+
+lifu@alien18-R2:~/mcp$ cat ~/mcp/requirements.txt 
+mcp
+
+lifu@alien18-R2:~/mcp$ cat /home/lifu/.config/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json
+{
+  "mcpServers": {
+    "weather_service": {
+      "command": "/home/lifu/mcp/.venv/bin/python",
+      "args": [
+        "/home/lifu/mcp/weather_server.py"
+      ]
+    }
+  }
+}
+
+lifu@alien18-R2:~/mcp$ 
+
+
+# Config
+# Setting -> Agent Skills -> MCP servers -> Refresh ->  WeatherService On
+
+# Chat
+# - Per workspace, must use @agent to auto start the MCP
+#   Once trigger, you can continue the chat without repeat @agent
+@agent What's the current weather in Austin, Texas?
+
+
+
+
+
+
+
+
+
+
+
+
+
