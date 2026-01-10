@@ -1,0 +1,8 @@
+
+
+# Windows Keyboard for Mac
+Setting -> Keyboard -> Keyboard shortcut -> 
+(left pane button) Modifier Keys -> 
+ 	Control -> Control
+ 	Option -> Command 
+	Command -> Option

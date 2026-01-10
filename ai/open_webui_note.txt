@@ -10,6 +10,15 @@ MCPO: MCP-to-OpenAPI) is an essential proxy tool that bridges the gap between
 local Model Context Protocol (MCP) servers and web-based applications 
 like Open WebUI
 
+# Open-webui Mac
+(base) lifu@Lifus-Mac-mini ~ % brew install uv
+(base) lifu@Lifus-Mac-mini ~ % mkdir open_webui && cd open_webui
+(base) lifu@Lifus-Mac-mini open_webui % uv init --python=3.11 .
+(base) lifu@Lifus-Mac-mini open_webui % uv venv
+(base) lifu@Lifus-Mac-mini open_webui % source .venv/bin/activate
+(base) lifu@Lifus-Mac-mini open_webui % uv pip install open-webui
+(base) lifu@Lifus-Mac-mini open_webui % open-webui serve
+(base) lifu@Lifus-Mac-mini open_webui % curl http://localhost:8080
 
 
 # Open-webui Linux

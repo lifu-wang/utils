@@ -1,48 +1,67 @@
-# Download
 
-# Run
-$ ./LM-Studio-0.3.37-1-x64.AppImage
+#---------------
+# Summary Exec
+#
+
+# 1. MCP
+% python ~/proj/mcp-hello/hello-http.py
+
+# 2. LMStudi server back-end
+% lms server stop
+% lms server start
+
+# 3. Open-webui front-end (need to first config lms over ollama)
+% source ~/open_webui/.venv/bin/activate
+% open-webui serve
+
+% 4. Use: http://localhost:8080
+
+
+#------------------------------------------------
+# Install Mac
+#    https://lmstudio.ai/blog/lmstudio-v0.3.37
+
+% ./LM-Studio-0.3.37-1-x64.AppImage
 
 # Fix error: You need to make sure that 
 # /tmp/.mount_LM-StuapiNKC/chrome-sandbox is owned by root 
 # and has mode 4755
 
-$ sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-$ ./LM-Studio-0.3.37-1-x64.AppImage 
-$ echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d/20-apparmor-donotrestrict.conf
-$ sudo sysctl -p /etc/sysctl.d/20-apparmor-donotrestrict.conf
-$ ./LM-Studio-0.3.37-1-x64.AppImage
+% sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+% ./LM-Studio-0.3.37-1-x64.AppImage 
+% echo 'kernel.apparmor_restrict_unprivileged_userns = 0' | sudo tee /etc/sysctl.d/20-apparmor-donotrestrict.conf
+% sudo sysctl -p /etc/sysctl.d/20-apparmor-donotrestrict.conf
+% ./LM-Studio-0.3.37-1-x64.AppImage
 
 
-# MCP - http://mcp.so 
-#       Below chat, in plug (integration), "install" edit mcp.json
+#-----------------------------
+# MCP config,  http://mcp.so 
+#     Below chat, in plug (integration), "install" edit mcp.json
 
-# Playwright - browser automation
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
+# Playwright - browser automation, https://mcp.so/server/playwright-mcp/microsoft
+   {
+     "mcpServers": {
+       "playwright": {
+         "command": "npx",
+         "args": [
+           "@playwright/mcp@latest"
+         ]
+       }
+     }
+   }
+
+# weather - https://github.com/macsymwang/hello-mcp-server
+   {
+     "mcpServers": {
+        "time": {
+	   "command": "uvx",
+	   "args": [
+	      "mcp-server-time",
+	      "--local-timezone=America/New_York"
+	    ]
+	 }
+       }
     }
-  }
-}
-
-# weather mcp.son 
-	{
-	  "mcpServers": {
-	    "time": {
-	      "command": "uvx",
-	      "args": [
-	        "mcp-server-time",
-	        "--local-timezone=America/New_York"
-	      ]
-	    }
-	  }
-	}
-
-# weather mcp: https://github.com/macsymwang/hello-mcp-server
 
 # hello-mcp-server: https://github.com/macsymwang/hello-mcp-server
     {
@@ -54,9 +73,125 @@ $ ./LM-Studio-0.3.37-1-x64.AppImage
              "hello_mcp_server.server"
            ],
            "cwd": "/home/lifu/hello-mcp-server",
-          "env": {}
+           "env": {}
         }
       }
     }
 
 
+
+
+#------------------------
+# MCP by stdio and HTTP
+
+
+(base) lifu@Lifus-Mac-mini mcp-hello % cat requirements.txt 
+mcp
+uvicorn
+
+(base) lifu@Lifus-Mac-mini mcp-hello % cat hello-http.py     
+from mcp.server.fastmcp import FastMCP
+
+# Initialize FastMCP server
+mcp = FastMCP("hello-http")
+
+@mcp.tool()
+async def hello_http(name: str = "World") -> str:
+    """Say hello via HTTP (SSE) transport."""
+    print(f"DEBUG: hello_http called with name={name}")
+    return f"Hello, {name}! I am an HTTP MCP server."
+
+if __name__ == "__main__":
+    # Run the server using SSE transport
+    # This typically runs on http://0.0.0.0:8000 by default
+    mcp.run(transport="sse")
+
+
+(base) lifu@Lifus-Mac-mini mcp-hello % cat hello-stdio.py     
+from mcp.server.fastmcp import FastMCP
+
+# Initialize FastMCP server
+mcp = FastMCP("hello-stdio")
+
+@mcp.tool()
+def hello_stdio(name: str = "World") -> str:
+    """Say hello via Stdio transport."""
+    return f"Hello, {name}! I am a Stdio MCP server."
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")
+
+
+(base) lifu@Lifus-Mac-mini mcp-hello % cat mcp.json 
+{
+  "mcpServers": {
+    "hello-stdio": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp[cli]",
+        "/Users/lifu/proj/mcp-hello/hello-stdio.py"
+      ]
+    },
+    "hello-http": {
+      "url": "http://127.0.0.1:8000/sse"
+    }
+  }
+}
+
+# MCP inspector debug
+#    list tools
+% npx @modelcontextprotocol/inspector python3 hello-stdio.py
+% npx @modelcontextprotocol/inspector http://localhost:8000/sse
+
+
+#---------------------------------------------
+# open-webui (front-end) + LMstudio (backend)
+
+# Install open-webui app on Mac
+
+% brew install uv
+% mkdir open_webui && cd open_webui
+% uv init --python=3.11 .
+% uv venv
+% source .venv/bin/activate
+% uv pip install open-webui
+% open-webui serve
+% curl http://localhost:8080
+
+
+# LMStudio service
+
+% lms server stop
+% lms server start
+% lms server status
+The server is running on port 1234.
+
+% lms chat
+% lms ls
+google/gemma-3-12b (1 variant)    12B       gemma3    8.07 GB            
+qwen/qwen3-8b (1 variant)         8B        qwen3     4.62 GB    ✓ LOADED
+
+% lms ps
+qwen/qwen3-8b    qwen/qwen3-8b    IDLE      4.62 GB    4096       
+
+% lms unload qwen/qwen3-8b
+% lms load  google/gemma-3-12b
+
+
+# Config open-webui: http://localhost:8080
+#
+#    Right Down Avatar: setting -> (neat button) -> Admin Settings -> Connections
+#                    OpenAI API: on, URL: http://localhost:1234/v1, bearer: lmstdio
+#                    Ollama API: OFF -> save -> Refresh
+# 
+
+
+
+
+
+
+
+
+                                                                                                             
