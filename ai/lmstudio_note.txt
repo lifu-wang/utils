@@ -182,10 +182,17 @@ qwen/qwen3-8b    qwen/qwen3-8b    IDLE      4.62 GB    4096
 
 # Config open-webui: http://localhost:8080
 #
+# Go http://localhost:8080/admin/settings/connections
+#
 #    Right Down Avatar: setting -> (neat button) -> Admin Settings -> Connections
 #                    OpenAI API: on, URL: http://localhost:1234/v1, bearer: lmstdio
 #                    Ollama API: OFF -> save -> Refresh
 # 
+# Restore:
+#   http://localhost:8080/admin/settings/connections
+#      OpenAI API: ON, setting: URL: http://localhost:11434
+#                               Ollama API: ON
+#                       Save -> Refresh
 
 
 
