@@ -1,4 +1,159 @@
+#---------------------------------------
+# AnythingLLM Desktop App Installation
 
+
+#----------------------------------
+# AnythingLLM Docker Installation
+
+# sudo groupadd docker
+$ sudo usermod -aG docker $USER
+$ sudo chmod 666 /var/run/docker.sock
+$ docker run hello-world
+
+$ mkdir -p $HOME/anythingllm-docker
+$ chmod -R 777 $HOME/anythingllm-docker
+ 
+$ docker pull mintplexlabs/anythingllm:latest
+
+$ docker images
+mintplexlabs/anythingllm        <none>    38f6ebecf321   2 months ago   2.91GB
+hello-world                     latest    ca9905c726f0   5 months ago   5.2kB
+
+$ docker run -d \
+  --name anythingllm \
+  --network=host \
+  -p 3001:3001 --cap-add SYS_ADMIN \
+  -v $HOME/anythingllm-docker:/app/server/storage \
+  -e STORAGE_DIR="/app/server/storage" \
+  mintplexlabs/anythingllm
+
+# status
+$ docker ps
+CONTAINER ID   IMAGE                    ...  COMMAND                  PORTS 
+b4c8e3b33641   mintplexlabs/anythingllm ...  "/bin/bash /usr/loca…"   0.0.0.0:3001->3001/tcp, [::]:3001->3001/tcp
+$ docker logs anythingllm
+$ docker stop anythingllm 2>/dev/null && docker rm anythingllm 2>/dev/null
+
+
+--> http://localhost:3001
+
+
+$ docker stop anythingllm 2>/dev/null && docker rm anythingllm 2>/dev/null
+
+#--------------------------------
+# AnythingLLM docker with Ollama
+#
+#   Fix config errors in AnythingLLM deocker using Ollama http://127.0.0.1:11434
+#
+# By default, Ollama serve can only respond localhost's http://127.0.0.1:11434/api/tags 
+# but not docker's  
+
+$ docker exec -it anythingllm curl http://172.17.0.1:11434/api/tags
+curl: (7) Failed to connect to 172.17.0.1 port 11434 after 0 ms: Couldn't connect to server
+
+# Clean up ollama
+$ sudo pkill ollama
+$ sudo lsof -i :11434
+$ sudo kill -9 76499   # Won't work as ollama daemon will auto-restart
+$ sudo systemctl stop ollama
+$ sudo systemctl disable ollama
+$ ss -lntp | grep 11434  
+
+# Fix systemctl, add two lines
+#   "OLLAMA_HOST=0.0.0.0:11434 ollama serve" tells Ollama to listen on all network interfaces
+#   0.0.0.0 = “bind to all network interfaces on the host”
+#   Now Ollama listens on:
+#      localhost (127.0.0.1) — still works on the host
+#      Docker bridge network (172.17.0.1) — now container can connect
+#      Any other network interface on the host
+$ sudo systemctl edit ollama
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+$ sudo systemctl start ollama
+$ docker exec -it anythingllm curl http://172.17.0.1:11434/api/tags
+
+# Manually start 
+$ OLLAMA_HOST=0.0.0.0:11434 ollama serve
+$ docker exec -it anythingllm curl http://172.17.0.1:11434/api/tags
+
+$ curl http://127.0.0.1:11434
+Ollama is running
+
+
+
+#-------------------------
+# AnythingLLM docker MCP
+
+$ cat get-temp-http.py
+from fastapi import FastAPI
+from mcp.server.fastmcp import FastMCP
+import uvicorn
+import asyncio
+
+app = FastAPI()
+mcp = FastMCP("weather_service")
+
+@mcp.tool()
+def get_temp(city: str) -> str:
+    city_lower = city.strip().lower()
+    if city_lower == "austin":
+        return "80F"
+    elif city_lower == "phoenix":
+        return "100F"
+    else:
+        return "N/A"
+
+@app.post("/mcp")
+async def call_mcp(request: dict):
+    tool_name = request.get("tool")
+    args = request.get("args", {})
+
+    # Call the tool
+    result = mcp.call_tool(tool_name, args)
+
+    # If the result is a coroutine, await it
+    if asyncio.iscoroutine(result):
+        result = await result
+
+    # Return a proper JSON response
+    return {"result": result}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5005)
+
+# Run MCP server
+$ python get-temp-http.py
+
+# Verify MCP server
+$ curl -X POST http://127.0.0.1:5005/mcp  \
+  -H "Content-Type: application/json" \
+  -d '{"tool":"get_temp","args":{"city":"Austin"}}' > xx
+
+$ cat xx
+{"result":[[{"type":"text","text":"80F","annotations":null,"_meta":null}],{"result":"80F"}]}
+
+$ docker exec -it anythingllm curl -X POST http://127.0.0.1:5005/mcp    -H "Content-Type: application/json" -H "Content-Type: application/json" -d '{"tool":"get_temp","args":{"city":"Austin"}}'
+
+# Config AnythingLLM docker
+# doens't work for "url": "http://host.docker.internal:5005/mcp"
+$ cat  ~/anythingllm-docker/plugins/anythingllm_mcp_servers.json
+{
+  "mcpServers": {
+    "weather_mcp": {
+      "type": "sse",
+      "url": "http://127.0.0.1:5005/mcp",
+      "auth": { "selectedType": "none" }
+    }
+  }
+}
+
+
+# Refresh http://localhost:3001/settings/agents
+# [TBD] Still do not see it...
+
+
+#-------------------------
+# AnythingLLM desktop MCP
 
 lifu@alien18-R2:~/mcp$ cat ~/mcp/weather_server.py 
 from mcp.server.fastmcp import FastMCP

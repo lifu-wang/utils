@@ -4,8 +4,7 @@
 % pip install pypdf
 
 # PDF in text 
-% python3 -c "import sys, pypdf; [open(f'{f}.txt', 'w').write('\n'.join(p.extract_text() for 
-      in pypdf.PdfReader(f).pages)) for f in sys.argv[1:]]" f1.pdf f2.pdf f3.pdf
+% python3 -c "import sys, pypdf; [open(f'{f}.txt', 'w').write('\n'.join(p.extract_text() for in pypdf.PdfReader(f).pages)) for f in sys.argv[1:]]" f1.pdf f2.pdf f3.pdf
 
 # PDF in images - Use AI-based ORC
 # Ubuntu apt install poppler-utils
