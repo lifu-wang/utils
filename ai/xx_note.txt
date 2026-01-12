@@ -1,0 +1,222 @@
+
+#-------------------
+# NVIDIA 
+
+$ ubuntu-drivers list
+$ apt install -y nvidia-driver-580-server nvidia-cuda-toolkit
+$ reboot
+
+$ nvidia-smi
+|   0  NVIDIA GeForce RTX 4060 ...    Off |   ... 
+
+$ nvcc --version
+Cuda compilation tools, release 12.0, V12.0.140
+
+$ gpustat
+alien18-R2                             Mon Nov 24 15:50:15 2025  580.95.05
+[0] NVIDIA GeForce RTX 4060 Laptop GPU | 50°C,  16 % |    14 /  8188 MB | gdm(4M)
+
+
+#-------
+# vscode 
+
+# Completely remove from macOS
+
+
+# App
+sudo rm -rf /Applications/Visual\ Studio\ Code.app
+
+# Data and settings
+rm -rf ~/Library/Application\ Support/Code
+rm -rf ~/Library/Caches/com.microsoft.VSCode
+rm -rf ~/Library/Caches/com.microsoft.VSCode.ShipIt
+rm -rf ~/Library/Preferences/com.microsoft.VSCode.plist
+rm -rf ~/Library/Saved\ Application\ State/com.microsoft.VSCode.savedState
+
+# Exetensions
+rm -rf ~/.vscode
+
+# Logs
+rm -rf ~/Library/Logs/Code
+
+# reinstall
+$ mv ~/Downloads/Visual\ Studio\ Code.app /Applications/ 
+$ code .
+
+#-------
+# uv
+
+$ uv init weather
+$ cd weather
+$ uv venv
+$ source .venv/bin/activate
+$ uv add "mcp[cli]" https
+
+# create weather.py, reference https://github.com/MarkTechStation/VideoCode
+
+
+#-------------------
+# mcp server by uvx 
+
+PS C:\Users\miswl> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+C:\Users\miswl>uvx pycowsay "hello world"
+  -----------
+< hello world >
+  -----------
+   \   ^__^
+    \  (oo)\_______
+       (__)\       )\/\
+           ||----w |
+           ||     ||
+
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
+$ uvx pycowsay "hello world"
+
+$ mkdir ~/proj/workspace/mcp_weather 
+$ cd ~/proj/workspace/mcp_weather
+
+# from https://github.com/daycyberwox/mcp-weather-app/blob/main/weather.py
+$ cat > weather.py
+
+# VScode/Cline MCP servers: Configure -> Configure MCP servers -> save/enable
+{
+  "mcpServers": {
+    "weather": {
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/lifuwang/proj/workspace/mcp_weather",
+        "run",
+        "weather.py"
+      ]
+    },
+    "timer": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "/Users/lifuwang/.local/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/lifuwang/proj/workspace/mcp_timer",
+        "run",
+        "timer.py"
+      ]
+    }
+  }
+}
+
+
+# Make sure uv run without errors
+$ apt install python3-httpx
+$ PIP_BREAK_SYSTEM_PACKAGES=1 pip install mcp fastmcp httpx
+
+$ cd /Users/lifuwang/proj/workspace/mcp_timer
+$ uv run timer.py 
+
+$ uv --directory $HOME/proj/workspace/mcp_weather run weather.py
+$ uv --directory $HOME/proj/workspace/mcp_timer run timer.py
+
+
+# Go VScode/Cline: ask "what's my weather", "Call get_current_time tool for timezone "Europe/London"
+
+
+$ export PATH="$HOME/.local/bin:$PATH"
+$ uv --directory /Users/lifuwang/proj/workspace/mcp_weather run weather.py
+$ /Users/lifuwang/.local/bin/uv --directory /Users/lifuwang/proj/workspace/mcp_timer run timer.p
+
+# cline chat question: can you show me the current time in London and the weather in Seattle?
+
+
+#------------------
+# vs code/continue
+
+mkdir -p ~/.cline
+nano ~/.cline/config.json
+{
+  "defaultModel": "codellama",
+  "apiBase": "http://localhost:11434"
+}
+
+
+
+
+# set ollama, VScode -> cmd + shift + p
+1. Cmd + Shift + P
+2. Continue: Open Settings (JSON)
+
+
+
+
+
+#--------
+# Spark
+#
+# - No need to change config timeout
+# - use qwen3-coder
+
+#-------------------------
+# Ollama install, config & service
+
+$ curl -fsSL https://ollama.com/install.sh | sh
+$ ollama list; ollama run gpt-oss --verbose; ollama show gpt-oss
+
+C:\Users\miswl\.ollama>more C:\Users\miswl\.ollama\config.yaml
+server:
+  timeout: 300000        # in milliseconds, i.e., 5 minutes
+  max_context_tokens: 8192
+logging:
+  level: info
+
+# Ctrl-Alt-Del: kill all ollama process
+
+# ollama start: start background servr
+C:\> ollama start
+C:\> ollama run llama3.2:latest "hello"
+
+# ollama serve: expose HTTP/REST API server, default is port 11434
+C:\> ollama serve llama3.2:latest --port 11434
+C:\> curl -X POST http://localhost:11434/predict -d '{"prompt":"Hello"}'
+C:\> ollama stop llama3.2:latest
+
+# check port
+C:\> netstat -ano | findstr 11434
+
+lifu@PCHOME:~$ sudo lsof -i :11434
+lifu@PCHOME:~$ sudo netstat -tuln | grep 11434
+
+
+#--------------------
+# Window: cline error
+
+# Errors: {"message":"Ollama request timed out after 30 seconds","modelId":"qwen3-coder:latest","providerId":"ollama"}
+# Reason: 
+#   C:\> ollama run qwen3-coder:latest "hi" --> if taking 30+ sec, model is too big
+#   C:\> ollama serve
+# 
+
+# Fix:
+# VS code: Ctrl+Shift+p: Open user settings (JSON)
+# add between {}
+      "cline.timeoutMs": 120000
+      
+#------------------------
+# Mac OS: Ollama install
+
+# clean
+sudo rm -rf /Applications/Ollama.app
+sudo rm /usr/local/bin/ollama
+rm -rf "~/Library/Application Support/Ollama"
+rm -rf "~/Library/Saved Application State/com.electron.ollama.savedState"
+rm -rf ~/Library/Caches/com.electron.ollama/
+rm -rf ~/Library/Caches/ollama
+rm -rf ~/Library/WebKit/com.electron.ollama
+rm -rf ~/.ollama
+
+# brew install
+brew install ollama
+
+# brew services start ollama
+brew services start ollama
+
