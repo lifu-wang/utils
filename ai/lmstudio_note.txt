@@ -33,6 +33,10 @@
 % sudo sysctl -p /etc/sysctl.d/20-apparmor-donotrestrict.conf
 % ./LM-Studio-0.3.37-1-x64.AppImage
 
+#--------------
+# Add new LLM
+# GUI left pane, 4th icon is magnifying icon, click that
+
 
 #-----------------------------
 # MCP config,  http://mcp.so 
@@ -79,7 +83,44 @@
     }
 
 
+# Use uv instead of Python
+{
+  "mcpServers": {
+    "mcp_weather": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp",
+        "/Users/lifu/proj/mcp/weather/mcp_weather.py"
+      ]
+    },
+    "mcp_timer": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp",
+        "/Users/lifu/proj/mcp/timer/mcp_timer.py"
+      ]
+    }
+  }
+}
 
+# Proxy - if user X, can use weather mco service, "I'm user X, what's the weather in austin"
+#         if user Y, can use timer mcp service, "I'm user Y, what time is it in phoenix now"
+{
+  "mcpServers": {
+    "mcp_weather": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "mcp",
+        "/Users/lifu/proj/mcp/weather/mcp_weather.py"
+      ]
+    }
+}
 
 #------------------------
 # MCP by stdio and HTTP
