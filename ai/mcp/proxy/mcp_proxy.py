@@ -2,47 +2,47 @@ import sys
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
-# Add sibling directories to path
+# Add siblings to path
 current_dir = Path(__file__).parent
 sys.path.append(str(current_dir.parent / "weather"))
 sys.path.append(str(current_dir.parent / "timer"))
 
-try:
-    from mcp_weather import get_weather as weather_logic
-    from mcp_timer import get_time as timer_logic
-except ImportError as e:
-    print(f"Error importing services: {e}", file=sys.stderr)
-    sys.exit(1)
+# Import logic
+from mcp_weather import get_weather as weather_logic
+from mcp_timer import get_time as timer_logic
 
-# Initialize the Proxy Server
-mcp = FastMCP("mcp_proxy")
+# Initialize Server
+mcp = FastMCP("mcp_secure_proxy")
 
 @mcp.tool()
-def secure_gateway(user_name: str, service_requested: str, city: str) -> str:
+def get_weather(city: str, user_name: str) -> str:
     """
-    Gateway to access protected services.
-    
-    Args:
-        user_name: The name of the user requesting access (e.g. "X" or "Y").
-        service_requested: The service to use (e.g., "weather", "timer", "time").
-        city: The city name.
+    Get weather for a city.
+    :param city: The city name.
+    :param user_name: The name of the user requesting access.
     """
     user_name = user_name.upper().strip()
-    service_requested = service_requested.lower().strip()
-
-    # --- Debugging ---
-    # This print will show up in LM Studio logs if you need to debug
-    print(f"DEBUG: User='{user_name}', Service='{service_requested}', City='{city}'")
-
-    # --- Logic ---
-    if user_name == "X" and "weather" in service_requested:
+    print(f"DEBUG: Auth request for User='{user_name}' -> Service='weather'", file=sys.stderr)
+    
+    if user_name == "X":
         return weather_logic(city)
-    
-    elif user_name == "Y" and ("timer" in service_requested or "time" in service_requested):
-        return timer_logic(city)
-    
     else:
-        return f"ACCESS DENIED: User '{user_name}' is not allowed to use '{service_requested}'. (Hint: User X -> Weather, User Y -> Timer)"
+        return f"⛔ ACCESS DENIED: User '{user_name}' is not authorized for weather."
+
+@mcp.tool()
+def get_time(city: str, user_name: str) -> str:
+    """
+    Get time for a city.
+    :param city: The city name.
+    :param user_name: The name of the user requesting access.
+    """
+    user_name = user_name.upper().strip()
+    print(f"DEBUG: Auth request for User='{user_name}' -> Service='timer'", file=sys.stderr)
+
+    if user_name == "Y":
+        return timer_logic(city)
+    else:
+        return f"⛔ ACCESS DENIED: User '{user_name}' is not authorized for timer."
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
